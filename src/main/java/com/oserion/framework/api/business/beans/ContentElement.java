@@ -1,8 +1,5 @@
 package com.oserion.framework.api.business.beans;
 
-import org.springframework.data.mongodb.core.mapping.Document;
-
-@Document(collection = "contentElements")
 public class ContentElement {
 
 	public enum Type { editable, repeatable }

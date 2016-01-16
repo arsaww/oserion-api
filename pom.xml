@@ -79,37 +79,19 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.6.3</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
 		<plugins>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit47</artifactId>
-						<version>2.19</version>
-					</dependency>
-				</dependencies>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.1</version>
 				<configuration>
-					<skipTests>${skipTests}</skipTests>
-					<systemPropertiesFile>C:\Users\Jean-Baptiste\Documents\oserion\oserion-web\config.properties</systemPropertiesFile>
-<!-- 					<systemPropertyVariables> -->
-<!-- 						<lancementMVN>oui</lancementMVN> -->
-<!-- 					</systemPropertyVariables> -->
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
-
-	<!-- <build> -->
-	<!-- <resources>src/main/resources</resources> -->
-	<!-- </build> -->
-
 </project>
