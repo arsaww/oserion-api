@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.oserion.framework.api.business.ITemplificator;
+import com.oserion.framework.api.business.beans.ContentElement;
 import com.oserion.framework.api.exceptions.OserionDatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,6 +38,10 @@ public class OserionApiFacade {
 
 	public String getHtmlPage(String url, boolean showToolbar) throws OserionDatabaseException {
 		return templificator.generateHtmlPage(url, showToolbar);
+	}
+
+	public void setContentElementValue(ContentElement c) throws OserionDatabaseException {
+		dataHandler.upsertContentElementValue(c);
 	}
 
 

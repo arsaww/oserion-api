@@ -34,5 +34,9 @@ public interface IDataHandler {
 	/** DEBUG */
 	void displayContentBase();
 
+	void upsertContentElementValue(ContentElement c) throws OserionDatabaseException;
+
+	void upsertContentElementValue(String ref, String type, String value) throws OserionDatabaseException;
+
 	List<ContentElement> fillContentElements(List<ContentElement> elements) throws OserionDatabaseException;
 }

@@ -23,7 +23,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 import com.oserion.framework.api.business.beans.ContentElement;
 
-
 @EnableMongoRepositories
 public class MongoDBDataHandler implements IDataHandler {
 
@@ -195,6 +194,23 @@ public class MongoDBDataHandler implements IDataHandler {
                     String.format("Impossible to get the next '%s' sequence", sequenceName));
         }
     }
+
+    @Override
+    public void upsertContentElementValue(ContentElement c) throws OserionDatabaseException {
+        upsertContentElementValue(c.getRef(), c.getType(), c.getValue());
+    }
+
+    @Override
+    public void upsertContentElementValue(String ref, String type, String value) throws OserionDatabaseException {
+        try {
+            BasicDBObject obj = new BasicDBObject();
+            obj.append("$eval", String.format("fillContentElement('%s','%s','%s')", ref, type, value));
+        } catch (Exception e) {
+            throw new OserionDatabaseException(
+                    String.format("Impossible to fill element '%s : %s'", ref, type));
+        }
+    }
+
 
     @Override
     public List<ContentElement> fillContentElements(List<ContentElement> elements) throws OserionDatabaseException {
