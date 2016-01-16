@@ -19,6 +19,7 @@ import com.oserion.framework.api.business.impl.mongo.beans.MongoTemplate;
 import com.oserion.framework.api.exceptions.OserionDatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import com.oserion.framework.api.business.beans.ContentElement;
@@ -27,6 +28,7 @@ import com.oserion.framework.api.business.beans.ContentElement;
 public class MongoDBDataHandler implements IDataHandler {
 
     private static final String SEQUENCE_NAME_PAGE_KEY = "pageKey";
+    private static final String COLLECTION_CONTENT_ELEMENT = "contentElements";
 
     @Autowired
     private ITemplificator templificator;
@@ -203,8 +205,15 @@ public class MongoDBDataHandler implements IDataHandler {
     @Override
     public void upsertContentElementValue(String ref, String type, String value) throws OserionDatabaseException {
         try {
-            BasicDBObject obj = new BasicDBObject();
-            obj.append("$eval", String.format("fillContentElement('%s','%s','%s')", ref, type, value));
+            Query q = new Query(new Criteria().andOperator(
+                    Criteria.where("ref").is(ref),
+                    Criteria.where("type").is(type)
+                )
+            );
+            Update u = new Update();
+            u.set("value",value);
+
+            operations.upsert(q, u, COLLECTION_CONTENT_ELEMENT);
         } catch (Exception e) {
             throw new OserionDatabaseException(
                     String.format("Impossible to fill element '%s : %s'", ref, type));
@@ -226,7 +235,7 @@ public class MongoDBDataHandler implements IDataHandler {
                             );
                 }
                 Query q = new Query(new Criteria().orOperator(orConditions));
-                List<ContentElement> l = operations.find(q, ContentElement.class);
+                List<ContentElement> l = operations.find(q, ContentElement.class, COLLECTION_CONTENT_ELEMENT);
                 return l;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -234,28 +243,6 @@ public class MongoDBDataHandler implements IDataHandler {
             }
         }
         return elements;
-    }
-
-    public void insertOrUpdateContentElement(String ref, String type, String content){
-        Query q = new Query( new Criteria().andOperator(
-                Criteria.where("ref").is(ref),
-                Criteria.where("type").is(type)));
-        ContentElement c = operations.findOne(q, ContentElement.class);
-
-        boolean insert = false;
-        if (c == null) {
-            c = new ContentElement();
-            insert=true;
-        }
-
-        c.setRef(ref);
-        c.setType(type);
-        c.setValue(content);
-
-        if(insert)
-            operations.insert(c);
-        else
-            operations.save(c);
     }
 
 }
