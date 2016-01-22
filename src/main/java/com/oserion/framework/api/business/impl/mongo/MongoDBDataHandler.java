@@ -154,8 +154,17 @@ public class MongoDBDataHandler implements IDataHandler {
     }
 
     @Override
-    public ContentElement selectContent(String contentId, String contentType) {
-        return null;
+    public ContentElement selectContent(String ref, String type) {
+        Query q = new Query(new Criteria().andOperator(
+                Criteria.where("ref").is(ref),
+                Criteria.where("type").is(type)
+            )
+        );
+        /*q.fields().include("ref");
+        q.fields().include("type");
+        q.fields().include("value");*/
+        ContentElement c = operations.findOne(q, ContentElement.class, "contentElements");
+        return c;
     }
 
     @Override

@@ -10,6 +10,8 @@ public interface ITemplificator {
 	ITemplate createTemplateFromHTML(String name, String html);
 	String generateHtmlPage(String url, boolean showToolbar) throws OserionDatabaseException;
 
+	IPage generateFilledPageFromTemplate(String url, ITemplate t);
+
 	ITemplate generateFilledTemplateFromUrl(String url, boolean showToolbar) throws OserionDatabaseException;
 
 

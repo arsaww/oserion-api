@@ -1,14 +1,17 @@
 package com.oserion.framework.api.business.impl.jsoup;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.oserion.framework.api.business.IDataHandler;
+import com.oserion.framework.api.business.IPage;
 import com.oserion.framework.api.business.ITemplate;
 import com.oserion.framework.api.business.ITemplificator;
 import com.oserion.framework.api.business.beans.ContentElement;
 import com.oserion.framework.api.business.beans.ContentElement.Type;
+import com.oserion.framework.api.business.beans.PageReference;
 import com.oserion.framework.api.business.impl.mongo.beans.MongoTemplate;
 import com.oserion.framework.api.exceptions.OserionDatabaseException;
 import com.oserion.framework.api.util.CodeReturn;
@@ -18,10 +21,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 
 public class JsoupTemplificator implements ITemplificator {
 
     private static final Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static final String REF_PAGE = "--page";
     
 	@Autowired
 	private IDataHandler dataHandler;
@@ -76,7 +81,65 @@ public class JsoupTemplificator implements ITemplificator {
 		//getPageFromCacheTemplate
 		//getTemplate
 		ITemplate t = generateFilledTemplateFromUrl(url, showToolbar);
-		return t.getHtml();
+		//getPageFromCacheTemplate
+		IPage p = generateFilledPageFromTemplate(url, t);
+		return p.getHtml();
+	}
+
+	@Override
+	public IPage generateFilledPageFromTemplate(String url, ITemplate t) {
+
+		/** Create page **/
+		PageReference pr = findPageReferenceFromUrl(url, t);
+		JsoupPage p = new JsoupPage((JsoupTemplate) t, pr);
+
+		/** Prepare Variables **/
+		definePageContentElementReferences(p);
+
+		/** Fill the dom document **/
+		fillPageHtml(p);
+
+		return p;
+	}
+
+	private void fillPageHtml(JsoupPage p){
+		for(ContentElement c : p.getListPageElement()){
+			if(c.getValue() != null) {
+				Element e = p.getJsoupDocument().getElementById(c.getRef());
+				if(e != null && e.hasClass(c.getType())){
+					fillDomElement(e,c);
+				}
+			}
+		}
+	}
+
+	private void definePageContentElementReferences(JsoupPage p){
+		List<ContentElement> undefinedVarELements = (p.getTemplate()).getListVariableElement();
+		List<ContentElement> definedVarElements = new ArrayList<>();
+		for(ContentElement undefined : undefinedVarELements){
+            Elements e = p.getJsoupDocument().select("#" + undefined.getRef() + "." + undefined.getType());
+            String ref = getTrueIdentifier(undefined.getRef(), p);
+            e.attr("id",ref);
+			String type = undefined.getType();/*getTrueIdentifier(undefined.getType(), p);
+            e.removeClass(undefined.getType());
+            e.addClass(type);*/
+			ContentElement defined = dataHandler.selectContent(ref, type);
+			if(defined != null)
+				definedVarElements.add(defined);
+		}
+		p.setListPageElement(definedVarElements);
+	}
+
+	private String getTrueIdentifier(String identifier, JsoupPage p){
+		return identifier.replaceAll(REF_PAGE, "" + p.getPageReference().getKey());
+	}
+	private PageReference findPageReferenceFromUrl(String url, ITemplate t){
+		for(PageReference pr : t.getListPage()){
+			if(pr.getUrl().equals(url)){
+				return pr;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -151,7 +214,7 @@ public class JsoupTemplificator implements ITemplificator {
 		while(it.hasNext()) {
 			Element balise = it.next();
 			String type = getClassBalise(balise);
-			if(balise.id().contains("ref:")) {
+			if(balise.id().contains("--page")) {
 				//System.out.println(balise.toString());
 				ContentElement cte = new ContentElement(balise.id(), type , null /*balise.html()*/);
 				//				ContentElement cte = new ContentElement(balise.id(), ContentElement.Type.EDITABLE.toString());
