@@ -77,6 +77,7 @@ public class JsoupTemplificator implements ITemplificator {
 
 	@Override
 	public String generateHtmlPage(String url, boolean showToolbar) throws OserionDatabaseException {
+        //TODO CACHE HERE
 		//getPageFromFinalCachePage
 		//getPageFromCacheTemplate
 		//getTemplate
@@ -154,12 +155,33 @@ public class JsoupTemplificator implements ITemplificator {
 		return jsoupTemplate;
 	}
 
-	private void addToolbar(JsoupTemplate t){
+    @Override
+    public String generateHtmlTemplate(String url, boolean showToolbar, boolean enableJS) throws OserionDatabaseException {
+        ITemplate dbTemplate = dataHandler.selectTemplateFromUrl(url);
+        JsoupTemplate jsoupTemplate = buildJsoupTemplate(dbTemplate);
+		makeJsoupReadableScripts(enableJS,jsoupTemplate.getJsoupDocument());
+        if(showToolbar)
+            addToolbar(jsoupTemplate);
+        return jsoupTemplate.getHtml();
+    }
+
+	private void makeJsoupReadableScripts(boolean readable, Document doc){
+		if(readable){
+			doc.select("script-oserion-disable").tagName("script");
+		}else{
+			doc.select("script").tagName("script-oserion-disable");
+		}
+
+	}
+
+    private void addToolbar(JsoupTemplate t){
 		Document doc = t.getJsoupDocument();
 		Element jQuery = doc.body().appendElement("script");
 		jQuery.attr("src","/assets/scripts/jquery.min.js");
+		jQuery.attr("id","oserion-jquery-include-script");
 		Element toolbarElement = doc.body().appendElement("script");
 		toolbarElement.attr("src","/assets/oserion-toolbar/oserion-toolbar.js");
+		toolbarElement.attr("id","oserion-toolbar-include-script");
 		t.setHtml(t.getJsoupDocument().html());
 	}
 

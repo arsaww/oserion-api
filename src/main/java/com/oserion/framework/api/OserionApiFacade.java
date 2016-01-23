@@ -45,7 +45,8 @@ public class OserionApiFacade {
 	}
 
 
-
-
+	public String getHtmlTemplate(String url, boolean showToolbar, boolean enableJS) throws OserionDatabaseException {
+		return templificator.generateHtmlTemplate(url, showToolbar, enableJS);
+	}
 }
 
