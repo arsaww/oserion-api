@@ -178,10 +178,10 @@ public class JsoupTemplificator implements ITemplificator {
 		Document doc = t.getJsoupDocument();
 		Element jQuery = doc.body().appendElement("script");
 		jQuery.attr("src","/assets/scripts/jquery.min.js");
-		jQuery.attr("id","oserion-jquery-include-script");
+		jQuery.attr("class","oserion-script");
 		Element toolbarElement = doc.body().appendElement("script");
 		toolbarElement.attr("src","/assets/oserion-toolbar/oserion-toolbar.js");
-		toolbarElement.attr("id","oserion-toolbar-include-script");
+		toolbarElement.attr("class","oserion-script");
 		t.setHtml(t.getJsoupDocument().html());
 	}
 
