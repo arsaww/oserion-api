@@ -1,11 +1,8 @@
 package com.oserion.framework.api.business.impl.mongo;
 
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
@@ -91,14 +88,16 @@ public class MongoDBDataHandler implements IDataHandler {
     }
 
     @Override
-    public void updateTemplate(String name, String html) throws OserionDatabaseException {
-        Query q = new Query(Criteria.where("name").is(name));
-        MongoTemplate t = operations.findOne(q, MongoTemplate.class);
+    public void updateTemplate(ITemplate t, String html) throws OserionDatabaseException {
+
         if (t == null)
             throw new OserionDatabaseException(
-                    String.format("The template %s does not exists.", name));
+                    String.format("The template is null"));
+        if (!(t instanceof MongoTemplate))
+            throw new OserionDatabaseException(
+                    String.format("The template %s is not valid.", t.getName()));
 
-        ITemplate template = templificator.createTemplateFromHTML(name, html);
+        ITemplate template = templificator.createTemplateFromHTML(t.getName(), html);
         t.setHtml(html);
         t.setListTemplateElement(template.getListTemplateElement());
         t.setListVariableElement(template.getListVariableElement());
@@ -106,14 +105,24 @@ public class MongoDBDataHandler implements IDataHandler {
         operations.save(t);
     }
 
-
     @Override
-    public ITemplate selectTemplateFromUrl(String url) throws OserionDatabaseException {
+    public ITemplate selectTemplateByUrl(String url) throws OserionDatabaseException {
         Query q = new Query(Criteria.where("listPage").elemMatch(Criteria.where("url").is(url)));
         MongoTemplate t = operations.findOne(q, MongoTemplate.class);
         if (t == null)
             throw new OserionDatabaseNotFoundException(
                     String.format("There is no template matching the following url : %s", url));
+
+        return t;
+    }
+
+    @Override
+    public ITemplate selectTemplateByName(String name) throws OserionDatabaseException {
+        Query q = new Query(Criteria.where("name").is(name));
+        MongoTemplate t = operations.findOne(q, MongoTemplate.class);
+        if (t == null)
+            throw new OserionDatabaseException(
+                    String.format("The template %s does not exists.", name));
 
         return t;
     }

@@ -44,9 +44,13 @@ public class OserionApiFacade {
 		dataHandler.upsertContentElementValue(c);
 	}
 
-
 	public String getHtmlTemplate(String url, boolean showToolbar, boolean enableJS) throws OserionDatabaseException {
 		return templificator.generateHtmlTemplate(url, showToolbar, enableJS);
+	}
+
+	public void updateTemplate(String url, String html) throws OserionDatabaseException {
+		ITemplate t = dataHandler.selectTemplateByUrl(url);
+		dataHandler.updateTemplate(t, templificator.clearOserionMarkup(html));
 	}
 }
 

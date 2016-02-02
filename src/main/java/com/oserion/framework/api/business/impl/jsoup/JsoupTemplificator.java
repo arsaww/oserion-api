@@ -145,7 +145,7 @@ public class JsoupTemplificator implements ITemplificator {
 
 	@Override
 	public ITemplate generateFilledTemplateFromUrl(String url,  boolean showToolbar) throws OserionDatabaseException {
-		ITemplate dbTemplate = dataHandler.selectTemplateFromUrl(url);
+		ITemplate dbTemplate = dataHandler.selectTemplateByUrl(url);
 		JsoupTemplate jsoupTemplate = buildJsoupTemplate(dbTemplate);
 		List<ContentElement> filledElements = dataHandler.fillContentElements(jsoupTemplate.getListTemplateElement());
 		jsoupTemplate.setListTemplateElement(filledElements);
@@ -157,7 +157,7 @@ public class JsoupTemplificator implements ITemplificator {
 
     @Override
     public String generateHtmlTemplate(String url, boolean showToolbar, boolean enableJS) throws OserionDatabaseException {
-        ITemplate dbTemplate = dataHandler.selectTemplateFromUrl(url);
+        ITemplate dbTemplate = dataHandler.selectTemplateByUrl(url);
         JsoupTemplate jsoupTemplate = buildJsoupTemplate(dbTemplate);
 		makeJsoupReadableScripts(enableJS,jsoupTemplate.getJsoupDocument());
         if(showToolbar)
@@ -165,11 +165,21 @@ public class JsoupTemplificator implements ITemplificator {
         return jsoupTemplate.getHtml();
     }
 
+	@Override
+	public String clearOserionMarkup(String html) {
+		Document d = Jsoup.parse(html);
+		d.select(".oserion-script").remove();
+		d.select("#oserion_toolbar").remove();
+		d.select(".oserion-style").remove();
+		d.select(".oserion_tootlbar_container").removeClass(".oserion_tootlbar_container");
+		return d.html();
+	}
+
 	private void makeJsoupReadableScripts(boolean readable, Document doc){
 		if(readable){
-			doc.select("script-oserion-disable").tagName("script");
+			doc.select("script-oserion-disable").tagName("script").removeAttr("style");
 		}else{
-			doc.select("script").tagName("script-oserion-disable");
+			doc.select("script").tagName("script-oserion-disable").attr("style","display:none;");
 		}
 
 	}
@@ -329,5 +339,6 @@ public class JsoupTemplificator implements ITemplificator {
 	}
 
 }
+
 
 

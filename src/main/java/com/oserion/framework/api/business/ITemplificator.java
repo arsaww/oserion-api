@@ -16,6 +16,8 @@ public interface ITemplificator {
 
 	String generateHtmlTemplate(String url, boolean showToolbar, boolean enableJS) throws OserionDatabaseException;
 
+	String clearOserionMarkup(String html);
+
 
 	/*ContentElement majContenu(ContentElement e);
 	String construireFlux(MongoTemplate t1, int key);

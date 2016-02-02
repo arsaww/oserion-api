@@ -12,9 +12,10 @@ public interface IDataHandler {
 
 	boolean insertOrUpdateTemplate(String templateName, String fluxHtml);
 	void insertTemplate(String templateName, String fluxHtml) throws OserionDatabaseException;
-	void updateTemplate(String name, String html) throws OserionDatabaseException;
+	void updateTemplate(ITemplate t, String html) throws OserionDatabaseException;
 
-	ITemplate selectTemplateFromUrl(String url) throws OserionDatabaseException;
+	ITemplate selectTemplateByUrl(String url) throws OserionDatabaseException;
+	ITemplate selectTemplateByName(String name) throws OserionDatabaseException;
 
 	boolean insertOrUpdateManyContent(List<ContentElement> listElement);
 	boolean insertOrUpdateContent(ContentElement ele);
